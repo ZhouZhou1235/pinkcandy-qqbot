@@ -26,9 +26,10 @@ class MemoryChatRobot:
         self.max_memory_length :int = config.MemoryChatRobot_config['max_memory_length'] # 内存中保留最大对话轮数
         self.max_db_memory_length :int = config.MemoryChatRobot_config['max_db_memory_length'] # 数据库保存最大对话轮数
     # 获取对话链
-    def get_chain(self,session_id:str):
+    def get_chain(self, session_id:str, name: str = "", user_description:str = ""):
+        # modified by starlight: 添加系统提示词用户描述
         prompt = ChatPromptTemplate.from_messages([
-            ("system",self.botConfig.MemoryChatRobot_config['aichat_system_prompt']),
+            ("system", f"{self.botConfig.MemoryChatRobot_config['aichat_system_prompt']}\n和你对话的是{name}, {user_description}。") if name and user_description else self.botConfig.MemoryChatRobot_config['aichat_system_prompt'],
             MessagesPlaceholder(variable_name="history"),
             ("human", "{input}"),
         ])
@@ -92,8 +93,31 @@ class MemoryChatRobot:
             self.db.execute_query(sql,(session_id,history_json,history_json))
         except Exception as e:
             print(f"PINKCANDY MYSQL SAVE ERROR: {e}")
+
+    async def get_user_description(self,session_id:str):
+        sql = f"""
+            SELECT memory, name
+            FROM private_chat_user_memories
+            WHERE session_id='{session_id}'
+        """
+        result = self.db.query_data(sql)
+        if result and isinstance(result,list) and len(result)>0:
+            memory = result[0].get('memory')
+            name = result[0].get('name')
+            if memory:
+                return (name, memory)
+            else:
+                return ""
     # 私聊对话
     async def private_chat(self,session_id:str,user_input:str,save=True):
+        # modified by starlight: 获取用户描述信息
+        try:
+            user_description = await self.get_user_description(session_id)
+            if not user_description:
+                user_description = ("", "")
+        except Exception as e:
+            user_description = ("", "")
+        
         try:
             history = await self.load_private_chat(session_id)
             user_msg = {"type": "human","content": user_input}
@@ -103,7 +127,7 @@ class MemoryChatRobot:
                 self.chat_histories[session_id] = history.copy()
             else:
                 self.chat_histories[session_id] = history.copy()   
-            chain = self.get_chain(session_id)
+            chain = self.get_chain(session_id, user_description[0], user_description[1])
             response = await asyncio.to_thread(
                 chain.invoke,
                 {

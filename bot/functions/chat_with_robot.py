@@ -11,6 +11,8 @@ from core.config_manager import config_manager
 # 在私聊中与机器对话
 @eventCoolDown(2)
 async def private_chat_with_robot(bot:BotClient,message:PrivateMessage):
+    # blacklist
+    if message.sender.user_id in config_manager.bot_config.black_list: return
     if not True: return
     try:
         session_id = f"{message.sender.user_id}"
