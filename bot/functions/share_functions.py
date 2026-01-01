@@ -183,7 +183,7 @@ async def remind_neardate(bot:BotClient,groupId:str|int|None=None):
                 }
                 dateNearList.append(theDict)
     dateNearList.sort(key=lambda x: x['days_diff'])
-    if len(dateNearList) > 0:
+    if len(dateNearList)>0:
         for obj in dateNearList:
             theDate :datetime.date = obj['date']
             days_diff = obj['days_diff']
@@ -192,9 +192,10 @@ async def remind_neardate(bot:BotClient,groupId:str|int|None=None):
             elif days_diff == 1:
                 day_text = "[明天]"
             else:
-                day_text = f"[{days_diff}天后]"   
-            if int(str(groupId)) in config_manager.bot_config.full_show_groups:
-                remindNearText += f"{theDate.month}月{theDate.day}日{day_text} {obj['title']}\n"
+                day_text = f"[{days_diff}天后]"
+            if groupId is not None:
+                if int(str(groupId)) in config_manager.bot_config.full_show_groups:
+                    remindNearText += f"{theDate.month}月{theDate.day}日{day_text} {obj['title']}\n"
             else:
                 remindNearText += f"{theDate.month}月{theDate.day}日{day_text} ......\n"
         if groupId is None:

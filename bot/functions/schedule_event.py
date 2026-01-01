@@ -10,8 +10,9 @@ async def schedule_oneday(bot:BotClient):
 
 # 每三天执行一次
 async def schedule_threeday(bot:BotClient):
-    updateMessageScheduler(bot)
-
-# 每周执行一次
-async def schedule_week(bot:BotClient):
-    await remind_neardate(bot)
+    try:
+        print(f'neardate')
+        x = await remind_neardate(bot)
+        print(f'neardate {x}')
+    except Exception as e:
+        print(e)

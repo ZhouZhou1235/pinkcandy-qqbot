@@ -69,19 +69,6 @@ def begin_add_schedule(bot:BotClient):
         three_day_delay,
         run_and_loop_threeday
     )
-    # 每周任务
-    async def run_and_loop_weekly():
-        await schedule_week(bot)
-        config_manager.date_scheduler.schedule_loop_task(
-            60 * 60 * 24 * 7,
-            schedule_week,
-            bot
-        )
-    weekly_delay = calculate_first_delay(12,0,0)
-    config_manager.date_scheduler.schedule_task(
-        weekly_delay,
-        run_and_loop_weekly
-    )
     updateMessageScheduler(bot)
 
 # 创建客户端

@@ -6,12 +6,12 @@ After=network.target
 [Service]
 
 # 工作目录
-WorkingDirectory=/home/PINKCANDY_QQbot/bot
+WorkingDirectory=/home/pinkcandy-qqbot/bot
 
 # 启动
-# ExecStart=/usr/bin/python3 /home/PINKCANDY_QQbot/bot/main.py
-Environment=PATH=/home/PINKCANDY_QQbot/bot/venv/bin:$PATH
-ExecStart=/home/PINKCANDY_QQbot/bot/venv/bin/python /home/PINKCANDY_QQbot/bot/main.py
+# ExecStart=/usr/bin/python3 /home/pinkcandy-qqbot/bot/main.py
+Environment=PATH=/home/pinkcandy-qqbot/bot/venv/bin:$PATH
+ExecStart=/home/pinkcandy-qqbot/bot/venv/bin/python /home/pinkcandy-qqbot/bot/main.py
 
 # 重启
 Restart=always
