@@ -41,8 +41,10 @@ def add_event_to_bot(bot:BotClient):
     add_listen_event(bot,group_setting_action)
     add_listen_event(bot,private_chat_with_robot,False)
 
-# 开始时设置定时任务
-def begin_add_schedule(bot:BotClient):
+# 创建客户端
+def create_bot(): 
+    bot = BotClient()
+    add_event_to_bot(bot)
     # 每日任务
     async def run_and_loop_daily():
         await schedule_oneday(bot)
@@ -51,29 +53,10 @@ def begin_add_schedule(bot:BotClient):
             schedule_oneday,
             bot
         )
-    daily_delay = calculate_first_delay(10,0,0)
+    daily_delay = calculate_first_delay(0,1,0)
     config_manager.date_scheduler.schedule_task(
         daily_delay,
         run_and_loop_daily
     )
-    # 每三天任务  
-    async def run_and_loop_threeday():
-        await schedule_threeday(bot)
-        config_manager.date_scheduler.schedule_loop_task(
-            60 * 60 * 24 * 3,
-            schedule_threeday,
-            bot
-        )
-    three_day_delay = calculate_first_delay(11,0,0)
-    config_manager.date_scheduler.schedule_task(
-        three_day_delay,
-        run_and_loop_threeday
-    )
     updateMessageScheduler(bot)
-
-# 创建客户端
-def create_bot(): 
-    bot = BotClient()
-    add_event_to_bot(bot)
-    begin_add_schedule(bot)
     return bot

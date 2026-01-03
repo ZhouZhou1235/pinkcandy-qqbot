@@ -161,11 +161,11 @@ async def remind_date(bot:BotClient):
             else:
                 await bot.api.post_group_msg(
                     group_id=groupId,
-                    text=f"==={today.month}月{today.day}日是某{len(dateList)}件事的特别日期==="
+                    text=f"==={today.month}月{today.day}日有特别的某{len(dateList)}件事==="
                 )
 
 # 临近特别日期提醒
-async def remind_neardate(bot:BotClient,groupId:str|int|None=None):
+async def remind_neardate(bot:BotClient,groupId:str|int):
     dateRemindResult = get_dates()
     today = datetime.date.today()
     dateNearList = []
@@ -193,15 +193,10 @@ async def remind_neardate(bot:BotClient,groupId:str|int|None=None):
                 day_text = "[明天]"
             else:
                 day_text = f"[{days_diff}天后]"
-            if groupId is not None:
-                if int(str(groupId)) in config_manager.bot_config.full_show_groups:
-                    remindNearText += f"{theDate.month}月{theDate.day}日{day_text} {obj['title']}\n"
+            if int(str(groupId)) in config_manager.bot_config.full_show_groups:
+                remindNearText += f"{theDate.month}月{theDate.day}日{day_text} {obj['title']}\n"
             else:
                 remindNearText += f"{theDate.month}月{theDate.day}日{day_text} ......\n"
-        if groupId is None:
-            for group_id in get_listening_groups():
-                await bot.api.post_group_msg(group_id=group_id, text=remindNearText)
-        else:
-            await bot.api.post_group_msg(group_id=groupId, text=remindNearText)
-    elif groupId is not None:
+        await bot.api.post_group_msg(group_id=groupId, text=remindNearText)
+    else:
         await bot.api.post_group_msg(group_id=groupId, text='PINKCANDY: no events near dates.')
