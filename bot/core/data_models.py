@@ -27,6 +27,7 @@ class BotConfig:
             qq_number=obj['qq_number'],
             master_number=obj['master_number'],
             admin_list=obj['admin_list'],
+            black_list=obj['black_list'],
             listen_qq_groups=obj['listen_qq_groups'],
             full_show_groups=obj['full_show_groups'],
             fixed_begin=obj['fixed_begin'],
