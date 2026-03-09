@@ -58,7 +58,7 @@ def eventCoolDown(seconds:int):
         return wrapped
     return decorator
 
-# 识别 @ 在
+# 识别 @ 指向
 def is_at(messageRaw:str):
     if re.compile(at_pattern).search(messageRaw): return True
     return False

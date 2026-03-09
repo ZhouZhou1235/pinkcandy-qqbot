@@ -8,15 +8,14 @@ from core.config_manager import config_manager
 from ncatbot.core import GroupMessage
 from core.global_utils import *
 
-
 # 查询特别日期
 def get_dates(): return config_manager.mysql_connector.query_data("SELECT * FROM date_reminder ORDER BY date")
 
-# 更新定时说话定时器
-def updateMessageScheduler(bot:BotClient):
+# 更新调度者
+def updateBotScheduler(bot:BotClient):
     try:
         config_manager.mysql_connector.execute_query("DELETE FROM schedule_messages WHERE time<NOW() and isloop=0")
-        config_manager.message_scheduler.cancel_all_tasks()
+        config_manager.scheduler.cancel_all_tasks()
         result = config_manager.mysql_connector.query_data("SELECT * FROM schedule_messages")
         if result:
             for obj in result:
@@ -35,21 +34,33 @@ def updateMessageScheduler(bot:BotClient):
                 if is_loop:
                     def run_and_loop(groupid=groupid,msg_content=content):
                         bot.api.post_group_msg_sync(group_id=groupid,text=msg_content)
-                        config_manager.message_scheduler.schedule_loop_task(
+                        config_manager.scheduler.schedule_loop_task(
                             interval_seconds,
                             lambda: bot.api.post_group_msg_sync(group_id=groupid,text=msg_content)
                         )
                     delay = calculate_first_delay(task_time.hour,task_time.minute,task_time.second)
-                    config_manager.message_scheduler.schedule_task(
+                    config_manager.scheduler.schedule_task(
                         delay,
                         run_and_loop
                     )
                 else:
                     delay_seconds = task_timestamp-current_time
-                    config_manager.message_scheduler.schedule_task(
+                    config_manager.scheduler.schedule_task(
                         int(delay_seconds),
                         send_func
                     )
+        # 每日任务
+        async def run_and_loop_daily():
+            await remind_date(bot)
+            config_manager.scheduler.schedule_loop_task(
+                60 * 60 * 24,
+                remind_date,
+                bot
+            )
+        config_manager.scheduler.schedule_task(
+            calculate_first_delay(0,1,0),
+            run_and_loop_daily
+        )
     except Exception as e: print(e)
 
 # 添加定时任务
@@ -97,7 +108,7 @@ async def add_schedule_task(bot:BotClient,message:GroupMessage,is_loop:bool):
         )
         result = config_manager.mysql_connector.execute_query(sql,params)
         if result:
-            updateMessageScheduler(bot)
+            updateBotScheduler(bot)
             await message.reply(f"PINKCANDY: add schedule done.")
         else:
             await message.reply("PINKCANDY: add schedule failed!")
@@ -112,7 +123,7 @@ async def delete_schedule_task(bot:BotClient,message:GroupMessage):
         sql = "DELETE FROM schedule_messages WHERE Id = %s"
         result = config_manager.mysql_connector.execute_query(sql,(task_id,))
         if result:
-            updateMessageScheduler(bot)
+            updateBotScheduler(bot)
             await message.reply("PINKCANDY: delete schedule done.")
         else:
             await message.reply("PINKCANDY: delete schedule failed!")

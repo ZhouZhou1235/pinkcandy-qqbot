@@ -106,7 +106,6 @@ class ConfigManager:
         self.bot_config = BotConfig.load(config_data) # 配置
         self.mysql_connector = MySQLConnecter(self.bot_config) # MySQL连接者
         self.chat_robot = MemoryChatRobot(self.bot_config,self.mysql_connector) # 聊天机器人
-        self.date_scheduler = ScheduleTask("DateScheduler") # 日期定时任务
-        self.message_scheduler = ScheduleTask("MessageScheduler") # 消息定时任务
+        self.scheduler = ScheduleTask("bot-scheduler") # 调度者
 
 config_manager = ConfigManager()

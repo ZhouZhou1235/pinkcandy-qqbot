@@ -22,4 +22,4 @@ source venv/bin/activate
 pip install -r requirements.txt
 
 创建 bot_config.json 放到根目录，程序运行会自动读取加载配置。
-全部完成后启动测试，如果成功应该能看到命令行输出 INFO 信息。
+全部完成后启动测试，如果成功应该能看到ncatbot的启动信息。
