@@ -1,6 +1,4 @@
-napcat/
-logs
-data
-__pycache__
-bot_config.json
-venv
+/config.json
+/bot.db
+/logs
+/data

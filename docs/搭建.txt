@@ -5,8 +5,6 @@
 安装python环境
 安装QQ
 安装napcat
-启动MySQL 创建相应数据库和表 pinkcandy_qqbot.sql
-编写机器人配置文件 bot_config_demo.json
 
 === 程序创建 ===
 bot即为应用文件夹，或者说项目根目录。
@@ -21,5 +19,15 @@ python3 -m venv venv
 source venv/bin/activate
 pip install -r requirements.txt
 
-创建 bot_config.json 放到根目录，程序运行会自动读取加载配置。
+=== 配置文件 ===
+创建 config.json 放到根目录，程序运行会自动读取加载配置。
+
+参考 docs/bot_config_demo.json 修改配置：
+- SQLite配置：数据库文件路径
+- MemoryChatRobot_config：AI模型配置
+- Ncatbot_config：NapCat连接配置
+  - remote_mode: 设置为true，直接连接已启动的NapCat，不尝试自动安装和启动
+
+=== 启动测试 ===
+程序启动时会自动检查并初始化SQLite数据库，无需手动执行初始化脚本
 全部完成后启动测试，如果成功应该能看到ncatbot的启动信息。

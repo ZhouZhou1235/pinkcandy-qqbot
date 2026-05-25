@@ -1,33 +1,31 @@
-# 对话人工智能体
 
 import asyncio
 import json
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain_core.runnables import RunnablePassthrough
 from langchain_openai import ChatOpenAI
-from typing import Dict, List
+from typing import Dict, List, Optional
 from pydantic import SecretStr
-from core.data_models import BotConfig
-from core.connect_database import MySQLConnecter
+from code.models import BotConfig
+from code.database import MySQLConnecter
 
-# 内存记忆人工智能体
 class MemoryChatRobot:
-    def __init__(self,config:BotConfig,db:MySQLConnecter):
+    def __init__(self, config: BotConfig, db: MySQLConnecter):
         self.botConfig = config
         self.llm = ChatOpenAI(
             model=config.MemoryChatRobot_config['model'],
             base_url=config.MemoryChatRobot_config['base_url'],
             api_key=SecretStr(config.MemoryChatRobot_config['api_key']),
-            temperature=config.MemoryChatRobot_config['temperature']  # 温度
+            temperature=config.MemoryChatRobot_config['temperature']
         )
-        self.chat_histories: Dict[str,list] = {} # 对话记录存储
-        self.db = db # 数据库连接者
-        self.max_memory_length :int = config.MemoryChatRobot_config['max_memory_length'] # 内存中保留最大对话轮数
-        self.max_db_memory_length :int = config.MemoryChatRobot_config['max_db_memory_length'] # 数据库保存最大对话轮数
-    # 获取对话链
-    def get_chain(self,session_id:str):
+        self.chat_histories: Dict[str, list] = {}
+        self.db = db
+        self.max_memory_length: int = config.MemoryChatRobot_config['max_memory_length']
+        self.max_db_memory_length: int = config.MemoryChatRobot_config['max_db_memory_length']
+
+    def get_chain(self, session_id: str):
         prompt = ChatPromptTemplate.from_messages([
-            ("system",self.botConfig.MemoryChatRobot_config['aichat_system_prompt']),
+            ("system", self.botConfig.MemoryChatRobot_config['aichat_system_prompt']),
             MessagesPlaceholder(variable_name="history"),
             ("human", "{input}"),
         ])
@@ -39,8 +37,8 @@ class MemoryChatRobot:
             | self.llm
         )
         return chain
-    # 格式化消息
-    def format_history(self,session_id:str):
+
+    def format_history(self, session_id: str):
         from langchain_core.messages import AIMessage, HumanMessage
         formatted = []
         for msg in self.chat_histories.get(session_id, []):
@@ -49,59 +47,58 @@ class MemoryChatRobot:
             else:
                 formatted.append(AIMessage(content=msg["content"]))
         return formatted
-    # 保存消息
-    def save_message(self,session_id:str,message:dict):
+
+    def save_message(self, session_id: str, message: dict):
         if session_id not in self.chat_histories:
             self.chat_histories[session_id] = []
         self.chat_histories[session_id].append(message)
-        if len(self.chat_histories[session_id])>self.max_memory_length:
+        if len(self.chat_histories[session_id]) > self.max_memory_length:
             self.chat_histories[session_id] = self.chat_histories[session_id][-self.max_memory_length:]
-    # 限制消息数量
-    def limit_history_length(self,history:List[dict]):
+
+    def limit_history_length(self, history: List[dict]):
         if len(history) > self.max_db_memory_length:
             return history[-self.max_db_memory_length:]
         return history
-    # 抹除记忆
+
     def clear_memories(self):
         self.chat_histories.clear()
-    # 加载私聊历史对话
+
     async def load_private_chat(self, session_id: str):
-        sql = f"""
+        sql = """
             SELECT history_json
             FROM private_chat_memories
-            WHERE session_id='{session_id}'
+            WHERE session_id = ?
         """
-        result = self.db.query_data(sql)
-        if result and isinstance(result,list) and len(result)>0:
+        result = self.db.query_data(sql, (session_id,))
+        if result and isinstance(result, list) and len(result) > 0:
             history_json = result[0].get('history_json')
             if history_json:
                 history = json.loads(history_json)
                 return self.limit_history_length(history)
         return []
-    # 私聊保存到数据库
-    async def save_private_chat(self,session_id:str,history:List[dict]):
+
+    async def save_private_chat(self, session_id: str, history: List[dict]):
         try:
             limited_history = self.limit_history_length(history)
             history_json = json.dumps(limited_history, ensure_ascii=False)
             sql = """
-                INSERT INTO private_chat_memories (session_id,history_json) 
-                VALUES (%s,%s)
-                ON DUPLICATE KEY UPDATE history_json=%s
+                INSERT OR REPLACE INTO private_chat_memories (session_id, history_json)
+                VALUES (?, ?)
             """
-            self.db.execute_query(sql,(session_id,history_json,history_json))
+            self.db.execute_query(sql, (session_id, history_json))
         except Exception as e:
-            print(f"PINKCANDY MYSQL SAVE ERROR: {e}")
-    # 私聊对话
-    async def private_chat(self,session_id:str,user_input:str,save=True):
+            print(f"DB SAVE ERROR: {e}")
+
+    async def private_chat(self, session_id: str, user_input: str, save: bool = True) -> Optional[str]:
         try:
             history = await self.load_private_chat(session_id)
-            user_msg = {"type": "human","content": user_input}
+            user_msg = {"type": "human", "content": user_input}
             history.append(user_msg)
-            self.save_message(session_id,user_msg)
+            self.save_message(session_id, user_msg)
             if session_id not in self.chat_histories:
                 self.chat_histories[session_id] = history.copy()
             else:
-                self.chat_histories[session_id] = history.copy()   
+                self.chat_histories[session_id] = history.copy()
             chain = self.get_chain(session_id)
             response = await asyncio.to_thread(
                 chain.invoke,
@@ -111,6 +108,9 @@ class MemoryChatRobot:
                     "history": self.format_history(session_id)
                 }
             )
+            if not response or not response.content:
+                print("AI returned empty response")
+                return None
             ai_msg = {"type": "ai", "content": response.content}
             if save:
                 history.append(ai_msg)
@@ -118,41 +118,43 @@ class MemoryChatRobot:
                 await self.save_private_chat(session_id, history)
             return response.content
         except Exception as e:
-            print(f"PINKCANDY CHAT ERROR: {e}")
-    # 加载群聊历史
-    async def load_group_chat(self,session_id:str):
-        sql = f"""
+            print(f"CHAT ERROR: {e}")
+            import traceback
+            traceback.print_exc()
+            return None
+
+    async def load_group_chat(self, session_id: str):
+        sql = """
             SELECT history_json
             FROM group_chat_memories
-            WHERE session_id='{session_id}'
+            WHERE session_id = ?
         """
-        result = self.db.query_data(sql)
-        if result and isinstance(result, list) and len(result)>0:
+        result = self.db.query_data(sql, (session_id,))
+        if result and isinstance(result, list) and len(result) > 0:
             history_json = result[0].get('history_json')
             if history_json:
                 history = json.loads(history_json)
                 return self.limit_history_length(history)
         return []
-    # 群聊保存到数据库
-    async def save_group_chat(self,session_id:str,history:List[dict]):
+
+    async def save_group_chat(self, session_id: str, history: List[dict]):
         try:
             limited_history = self.limit_history_length(history)
             history_json = json.dumps(limited_history, ensure_ascii=False)
             sql = """
-                INSERT INTO group_chat_memories (session_id,history_json) 
-                VALUES (%s,%s)
-                ON DUPLICATE KEY UPDATE history_json=%s
+                INSERT OR REPLACE INTO group_chat_memories (session_id, history_json)
+                VALUES (?, ?)
             """
-            self.db.execute_query(sql,(session_id,history_json,history_json))
+            self.db.execute_query(sql, (session_id, history_json))
         except Exception as e:
-            print(f"PINKCANDY MYSQL SAVE ERROR: {e}")
-    # 群聊对话
-    async def group_chat(self,session_id:str,user_input:str,save=True):
+            print(f"DB SAVE ERROR: {e}")
+
+    async def group_chat(self, session_id: str, user_input: str, save: bool = True) -> Optional[str]:
         try:
             history = await self.load_group_chat(session_id)
             if session_id not in self.chat_histories:
-                self.chat_histories[session_id] = history.copy() 
-            user_msg = {"type": "human","content": user_input}
+                self.chat_histories[session_id] = history.copy()
+            user_msg = {"type": "human", "content": user_input}
             self.save_message(session_id, user_msg)
             chain = self.get_chain(session_id)
             response = await asyncio.to_thread(
@@ -162,11 +164,17 @@ class MemoryChatRobot:
                     "session_id": session_id,
                 }
             )
+            if not response or not response.content:
+                print("AI returned empty response")
+                return None
             ai_msg = {"type": "ai", "content": response.content}
             if save:
                 self.save_message(session_id, ai_msg)
-                current_history = self.chat_histories.get(session_id,[])
-                await self.save_group_chat(session_id,current_history)
+                current_history = self.chat_histories.get(session_id, [])
+                await self.save_group_chat(session_id, current_history)
             return response.content
         except Exception as e:
-            print(f"PINKCANDY CHAT ERROR: {e}")
+            print(f"CHAT ERROR: {e}")
+            import traceback
+            traceback.print_exc()
+            return None

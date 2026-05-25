@@ -1,0 +1,7 @@
+langchain_core
+langchain_openai
+ncatbot
+psutil
+pydantic
+Requests
+schedule

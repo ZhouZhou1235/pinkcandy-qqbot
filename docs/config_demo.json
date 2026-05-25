@@ -2,24 +2,15 @@
     "bot_name": "机器名称",
     "bot_info": "机器描述",
     "qq_number": "机器操作的QQ号",
-    "master_number": "机器主宰的QQ号",
+    "master_number": "总管理员的QQ号",
     "admin_list": [123456789],
     "listen_qq_groups": [123456789],
     "full_show_groups": [123456789],
-    "fixed_begin": "命令前缀",
-    "function_commands": {"test":"测试"},
-    "function_command_info": [
-        "指令名1：......",
-        "指令名2：......"
-    ],
-    "MySQL_config": {
-        "host": "localhost",
-        "user": "root",
-        "password": "123456",
-        "database": "database name"
+    "SQLite_config": {
+        "db_path": "bot.db"
     },
     "MemoryChatRobot_config": {
-        "model": "模型名称",
+        "model": "deepseek-chat",
         "temperature": 0.25,
         "aichat_system_prompt": "系统提示文本",
         "max_memory_length": 50,
