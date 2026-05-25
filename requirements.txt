@@ -1,7 +1,7 @@
-langchain_core
-langchain_openai
-ncatbot
-psutil
-pydantic
-Requests
-schedule
+langchain_core==0.3.72
+langchain_openai==0.3.28
+ncatbot==3.8.8.post7
+psutil==7.0.0
+pydantic==2.11.7
+Requests==2.32.4
+schedule==1.2.2
