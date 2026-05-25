@@ -1,3 +1,4 @@
+# 定时说话
 
 import re
 import time
@@ -7,6 +8,7 @@ from code.config import config_manager
 from ncatbot.core import GroupMessage
 from code.utils import calculate_first_delay, event_cooldown
 
+# 更新定时任务
 def update_bot_scheduler(bot: BotClient):
     try:
         now = datetime.datetime.now()
@@ -30,11 +32,9 @@ def update_bot_scheduler(bot: BotClient):
                     group_id,
                     content
                 )
-
         async def remind_date_task():
             from functions.date_reminder import remind_date
             await remind_date(bot)
-        
         def run_remind_date():
             import asyncio
             try:
@@ -44,7 +44,6 @@ def update_bot_scheduler(bot: BotClient):
                 asyncio.set_event_loop(loop)
             loop.run_until_complete(remind_date_task())
             loop.close()
-        
         remind_delay = calculate_first_delay(0, 1, 0)
         config_manager.scheduler.schedule_task(remind_delay, run_remind_date)
         config_manager.scheduler.schedule_loop_task(
@@ -56,6 +55,7 @@ def update_bot_scheduler(bot: BotClient):
         import traceback
         traceback.print_exc()
 
+# 处理群聊定时任务
 @event_cooldown(5)
 async def group_scheduler_handler(bot: BotClient, message: GroupMessage):
     if message.group_id not in config_manager.bot_config.listen_qq_groups:
@@ -79,7 +79,6 @@ async def group_scheduler_handler(bot: BotClient, message: GroupMessage):
             print(f"ERROR: {e}")
             import traceback
             traceback.print_exc()
-
     elif msg_content.startswith("pk 设置定时 "):
         try:
             pattern = r'pk 设置定时 (\d{1,2}:\d{2})\s+(\d+)\s+(.+)'
@@ -120,7 +119,6 @@ async def group_scheduler_handler(bot: BotClient, message: GroupMessage):
             print(f"ERROR: {e}")
             import traceback
             traceback.print_exc()
-
     elif msg_content.startswith("pk 删除定时 "):
         try:
             pattern = r'pk 删除定时 (\d+)'
@@ -140,4 +138,3 @@ async def group_scheduler_handler(bot: BotClient, message: GroupMessage):
             print(f"ERROR: {e}")
             import traceback
             traceback.print_exc()
-

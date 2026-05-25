@@ -1,3 +1,4 @@
+# 连接数据库
 
 import sqlite3
 from code.models import BotConfig

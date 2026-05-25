@@ -7,7 +7,6 @@ from .launcher import create_bot, add_listen_event
 from .utils import (
     event_cooldown,
     is_at,
-    get_commend_string,
     input_statement,
     is_equal_date,
     calculate_first_delay,
@@ -23,11 +22,9 @@ __all__ = [
     "add_listen_event",
     "event_cooldown",
     "is_at",
-    "get_commend_string",
     "input_statement",
     "is_equal_date",
     "calculate_first_delay",
     "api_get_user",
     "api_get_groups",
 ]
-

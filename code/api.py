@@ -1,3 +1,4 @@
+# napcat 接口
 
 from ncatbot.core import BotClient
 

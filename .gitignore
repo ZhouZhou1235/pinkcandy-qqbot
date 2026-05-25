@@ -2,3 +2,4 @@
 /bot.db
 /logs
 /data
+__pycache__

@@ -1,3 +1,4 @@
+# 工具
 
 from functools import wraps
 import re
@@ -8,9 +9,6 @@ from code.config import config_manager
 from ncatbot.core import GroupMessage, PrivateMessage
 
 at_pattern = rf'\[CQ:at,qq={config_manager.bot_config.qq_number}\]|@{config_manager.bot_config.bot_name}|@{config_manager.bot_config.qq_number}'
-
-def get_commend_string(commend_key: str):
-    return f"pk {commend_key}"
 
 def event_cooldown(seconds: int):
     def decorator(func: Callable):
@@ -59,4 +57,3 @@ def calculate_first_delay(target_hour: int, target_minute=0, target_second=0):
         target_time_tomorrow = target_time_today + datetime.timedelta(days=1)
         delay_seconds = (target_time_tomorrow - now).total_seconds()
     return int(delay_seconds)
-
