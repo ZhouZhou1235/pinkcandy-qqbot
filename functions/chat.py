@@ -25,12 +25,12 @@ async def private_chat_handler(bot: BotClient, message: PrivateMessage):
 async def group_chat_handler(bot: BotClient, message: GroupMessage):
     if message.group_id not in config_manager.bot_config.listen_qq_groups:
         return
-    if not is_at(message.raw_message):
-        return
     if message.raw_message == "pk 清除记忆" and message.user_id in config_manager.bot_config.admin_list:
         config_manager.chat_robot.clear_memories()
         config_manager.mysql_connector.execute_query("DELETE FROM group_chat_memories")
         message.reply_sync(text="清除记忆完成")
+        return
+    if not is_at(message.raw_message):
         return
     try:
         session_id = f"{message.group_id}"
