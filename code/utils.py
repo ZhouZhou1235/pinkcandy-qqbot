@@ -37,7 +37,7 @@ def is_at(message_raw: str):
     return False
 
 def input_statement(message: GroupMessage | PrivateMessage):
-    text = f"qq:{message.user_id} user:{message.sender.nickname} time:{datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")} 对你说："
+    text = f"qq:{message.user_id} user:{message.sender.nickname} time:{datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')} 对你说："
     clean_msg = re.sub(at_pattern, '', message.raw_message).strip()
     text += clean_msg
     return text

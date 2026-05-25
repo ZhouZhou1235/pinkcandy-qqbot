@@ -21,6 +21,7 @@
     "Ncatbot_config":{
         "ws_uri":"ws://localhost:3001",
         "ws_token":"napcat token",
-        "enable_webui":false
+        "enable_webui":false,
+        "remote_mode": true
     }
 }
