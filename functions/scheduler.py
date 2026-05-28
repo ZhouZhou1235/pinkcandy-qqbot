@@ -25,8 +25,8 @@ def update_bot_scheduler(bot: BotClient):
                     bot.api.post_group_msg_sync(group_id=int(gid), text=msg)
 
                 delay = calculate_first_delay(task_time.hour, task_time.minute, task_time.second)
-                config_manager.scheduler.schedule_task(delay, send_func, group_id, content)
-                config_manager.scheduler.schedule_loop_task(
+                config_manager.scheduler.schedule_loop_task_at(
+                    delay,
                     interval_seconds,
                     send_func,
                     group_id,
@@ -45,8 +45,8 @@ def update_bot_scheduler(bot: BotClient):
             loop.run_until_complete(remind_date_task())
             loop.close()
         remind_delay = calculate_first_delay(0, 1, 0)
-        config_manager.scheduler.schedule_task(remind_delay, run_remind_date)
-        config_manager.scheduler.schedule_loop_task(
+        config_manager.scheduler.schedule_loop_task_at(
+            remind_delay,
             60 * 60 * 24,
             run_remind_date
         )

@@ -63,6 +63,22 @@ class ScheduleTask:
         job = self.schedule_instance.every(interval).seconds.do(self._run_async_task, task, *args, **kwargs)
         self.tasks.append({"id": job_id, "job": job})
         return job_id
+    
+    def schedule_loop_task_at(self, first_delay: int, interval: int, task: Callable, *args, **kwargs):
+        def run_and_reschedule():
+            self._run_async_task(task, *args, **kwargs)
+            if self.running:
+                next_timer = threading.Timer(interval, run_and_reschedule)
+                next_timer.daemon = True
+                next_timer.start()
+                self.tasks.append({"id": f"loop_reschedule_{id(next_timer)}", "job": None, "timer": next_timer})
+        
+        timer = threading.Timer(first_delay, run_and_reschedule)
+        timer.daemon = True
+        timer.start()
+        job_id = f"loop_at_{id(timer)}"
+        self.tasks.append({"id": job_id, "job": None, "timer": timer})
+        return job_id
 
     def cancel_all_tasks(self):
         for task in self.tasks:
