@@ -9,6 +9,7 @@ from .date_reminder import group_date_handler
 from .scheduler import group_scheduler_handler
 from .search_gallery import group_search_gallery_handler
 from .active_talk import group_active_talk_handler
+from .get_tarotcard import group_tarot_handler
 
 async def group_handler(bot: BotClient, message: GroupMessage):
     await group_test_handler(bot, message)
@@ -17,6 +18,7 @@ async def group_handler(bot: BotClient, message: GroupMessage):
     await group_date_handler(bot, message)
     await group_scheduler_handler(bot, message)
     await group_active_talk_handler(bot, message)
+    await group_tarot_handler(bot, message)
 
 async def private_handler(bot: BotClient, message: PrivateMessage):
     await private_chat_handler(bot, message)

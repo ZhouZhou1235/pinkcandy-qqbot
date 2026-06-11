@@ -4,6 +4,7 @@ from .date_reminder import group_date_handler, remind_date
 from .scheduler import group_scheduler_handler, update_bot_scheduler
 from .search_gallery import group_search_gallery_handler
 from .active_talk import group_active_talk_handler
+from .get_tarotcard import group_tarot_handler
 from .handlers import group_handler, private_handler
 
 __all__ = [
@@ -16,6 +17,7 @@ __all__ = [
     "update_bot_scheduler",
     "group_search_gallery_handler",
     "group_active_talk_handler",
+    "group_tarot_handler",
     "group_handler",
     "private_handler",
 ]

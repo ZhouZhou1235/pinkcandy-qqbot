@@ -29,6 +29,7 @@ async def group_test_handler(bot: BotClient, message: GroupMessage):
         help_text += "\npk 设置定时 格式：pk 设置定时 <时:分> <每多少分钟> <内容>"
         help_text += "\npk 删除定时 格式：pk 删除定时 <Id>"
         help_text += "\npk 来点粉糖 格式：pk 来点粉糖 <搜索文本>"
+        help_text += "\npk 抽塔罗牌"
         bot.api.post_group_msg_sync(group_id=message.group_id, text=help_text)
     elif msg_content == "pk 测试":
         try:
