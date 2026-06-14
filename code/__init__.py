@@ -1,7 +1,7 @@
 
 from .config import config_manager
 from .models import BotConfig
-from .database import MySQLConnecter
+from .database import SQLiteConnecter
 from .agent import MemoryChatRobot
 from .launcher import create_bot, add_listen_event
 from .utils import (
@@ -16,7 +16,7 @@ from .api import api_get_user, api_get_groups
 __all__ = [
     "config_manager",
     "BotConfig",
-    "MySQLConnecter",
+    "SQLiteConnecter",
     "MemoryChatRobot",
     "create_bot",
     "add_listen_event",

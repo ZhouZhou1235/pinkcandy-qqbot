@@ -47,8 +47,6 @@ class SQLiteConnecter:
         if self.connection:
             self.connection.close()
 
-MySQLConnecter = SQLiteConnecter
-
 def database_exists(db_path: str) -> bool:
     if not os.path.exists(db_path):
         return False

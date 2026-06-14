@@ -9,7 +9,7 @@ import schedule
 import datetime
 from typing import Callable
 from code.models import BotConfig
-from code.database import MySQLConnecter
+from code.database import SQLiteConnecter
 from code.agent import MemoryChatRobot
 
 class ScheduleTask:
@@ -104,7 +104,7 @@ class ConfigManager:
         with open(self.config_path, 'r', encoding='UTF-8') as f:
             config_data = json.load(f)
         self.bot_config = BotConfig.load(config_data)
-        self.mysql_connector = MySQLConnecter(self.bot_config)
+        self.mysql_connector = SQLiteConnecter(self.bot_config)
         self.chat_robot = MemoryChatRobot(self.bot_config, self.mysql_connector)
         self.scheduler = ScheduleTask("bot-scheduler")
 

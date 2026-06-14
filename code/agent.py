@@ -8,10 +8,10 @@ from langchain_openai import ChatOpenAI
 from typing import Dict, List, Optional
 from pydantic import SecretStr
 from code.models import BotConfig
-from code.database import MySQLConnecter
+from code.database import SQLiteConnecter
 
 class MemoryChatRobot:
-    def __init__(self, config: BotConfig, db: MySQLConnecter):
+    def __init__(self, config: BotConfig, db: SQLiteConnecter):
         self.botConfig = config
         self.llm = ChatOpenAI(
             model=config.MemoryChatRobot_config['model'],
