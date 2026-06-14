@@ -1,0 +1,15 @@
+# linux systemctl 配置示例
+
+[Unit]
+Description=pinkcandy qqbot
+After=network.target
+
+[Service]
+WorkingDirectory=/home/zhou/programs/pinkcandy-qqbot
+Environment=PATH=/home/zhou/programs/pinkcandy-qqbot/venv/bin:$PATH
+ExecStart=/home/zhou/programs/pinkcandy-qqbot/venv/bin/python /home/zhou/programs/pinkcandy-qqbot/main.py
+Restart=always
+RestartSec=10s
+
+[Install]
+WantedBy=multi-user.target

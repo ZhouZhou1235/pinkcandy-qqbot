@@ -1,5 +1,6 @@
 # 搜索幻想动物画廊图片
 
+import random
 import re
 import requests
 from ncatbot.core import GroupMessage
@@ -11,6 +12,7 @@ search_url = 'https://gallery-system.pinkcandy.top/core/searchPinkCandy?searchte
 imagepreview_url = 'https://gallery-system.pinkcandy.top/files/GalleryPreview/'
 website_artwork_url = 'https://gallery.pinkcandy.top/artwork/'
 
+# 来点粉糖
 async def search_gallery_async(search_text: str):
     try:
         response = requests.get(search_url + search_text, timeout=10)
@@ -18,9 +20,10 @@ async def search_gallery_async(search_text: str):
         data = response.json()
         return data.get('artwork', [])
     except Exception as e:
-        print(f'ERROR: 搜索画廊失败: {e}')
+        print(f"pinkcandy error: 搜索画廊失败。{e}")
         return []
 
+# 处理来点粉糖
 @event_cooldown(3)
 async def group_search_gallery_handler(bot: BotClient, message: GroupMessage):
     if message.group_id not in config_manager.bot_config.listen_qq_groups:
@@ -38,7 +41,7 @@ async def group_search_gallery_handler(bot: BotClient, message: GroupMessage):
     if not artworks:
         bot.api.post_group_msg_sync(group_id=message.group_id, text=f'"{search_text}" 搜索结果为空')
         return
-    first_artwork = artworks[0]
+    first_artwork = random.choice(artworks)
     filename = first_artwork.get('filename', '')
     artwork_id = first_artwork.get('id', '')
     title = first_artwork.get('title', '')

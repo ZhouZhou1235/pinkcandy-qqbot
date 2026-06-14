@@ -6,9 +6,7 @@
     "admin_list": [123456789],
     "listen_qq_groups": [123456789],
     "full_show_groups": [123456789],
-    "SQLite_config": {
-        "db_path": "bot.db"
-    },
+    "SQLite_config": {"db_path": "bot.db"},
     "MemoryChatRobot_config": {
         "model": "deepseek-chat",
         "temperature": 0.25,
@@ -16,7 +14,14 @@
         "max_memory_length": 50,
         "max_db_memory_length": 100,
         "base_url": "https://api.deepseek.com",
-        "api_key": "api key value"
+        "api_key": "api key value",
+        "search_config": {
+            "enabled": true,
+            "url": "https://bing.com",
+            "timeout": 10,
+            "max_chars": 2000,
+            "trigger_keywords": ["?"]
+        }
     },
     "Ncatbot_config":{
         "ws_uri":"ws://localhost:3001",

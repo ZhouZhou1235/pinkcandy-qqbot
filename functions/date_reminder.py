@@ -81,7 +81,7 @@ async def group_date_handler(bot: BotClient, message: GroupMessage):
                 else:
                     await message.reply(text="添加特别日期失败")
         except Exception as e:
-            print(f"ERROR: {e}")
+            print(f"pinkcandy error: 日期提醒操作异常。{e}")
     elif msg_content.startswith("pk 删除日期 ") and message.user_id in config_manager.bot_config.admin_list:
         try:
             pattern = r'pk 删除日期 (\d{1,2})\.(\d{1,2})'
@@ -99,4 +99,4 @@ async def group_date_handler(bot: BotClient, message: GroupMessage):
                 else:
                     await message.reply(text="删除特别日期失败")
         except Exception as e:
-            print(f"ERROR: {e}")
+            print(f"pinkcandy error: 日期提醒操作异常。{e}")

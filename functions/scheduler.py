@@ -11,7 +11,6 @@ from code.utils import calculate_first_delay, event_cooldown
 # 更新定时任务
 def update_bot_scheduler(bot: BotClient):
     try:
-        now = datetime.datetime.now()
         config_manager.scheduler.cancel_all_tasks()
         result = config_manager.mysql_connector.query_data("SELECT * FROM schedule_messages")
         if result:
@@ -20,10 +19,8 @@ def update_bot_scheduler(bot: BotClient):
                 group_id = str(obj['groupid'])
                 content = obj['message']
                 interval_seconds = int(obj['looptime'])
-
                 def send_func(gid, msg):
                     bot.api.post_group_msg_sync(group_id=int(gid), text=msg)
-
                 delay = calculate_first_delay(task_time.hour, task_time.minute, task_time.second)
                 config_manager.scheduler.schedule_loop_task_at(
                     delay,
@@ -51,7 +48,7 @@ def update_bot_scheduler(bot: BotClient):
             run_remind_date
         )
     except Exception as e:
-        print(f"ERROR: {e}")
+        print(f"pinkcandy error: 定时任务操作异常。{e}")
         import traceback
         traceback.print_exc()
 
@@ -61,7 +58,6 @@ async def group_scheduler_handler(bot: BotClient, message: GroupMessage):
     if message.group_id not in config_manager.bot_config.listen_qq_groups:
         return
     msg_content = message.raw_message
-
     if msg_content == "pk 定时说话":
         try:
             sql = "SELECT * FROM schedule_messages WHERE groupid = ? ORDER BY time DESC LIMIT 50"
@@ -76,7 +72,7 @@ async def group_scheduler_handler(bot: BotClient, message: GroupMessage):
                 text += f"Id{task['Id']} {time_str}开始 每{task['looptime']//60}分钟发 {task['message'][:50]}\n---\n"
             await bot.api.post_group_msg(group_id=message.group_id, text=text)
         except Exception as e:
-            print(f"ERROR: {e}")
+            print(f"pinkcandy error: 定时任务操作异常。{e}")
             import traceback
             traceback.print_exc()
     elif msg_content.startswith("pk 设置定时 "):
@@ -116,7 +112,7 @@ async def group_scheduler_handler(bot: BotClient, message: GroupMessage):
             else:
                 await message.reply("添加定时任务失败")
         except Exception as e:
-            print(f"ERROR: {e}")
+            print(f"pinkcandy error: 定时任务操作异常。{e}")
             import traceback
             traceback.print_exc()
     elif msg_content.startswith("pk 删除定时 "):
@@ -135,6 +131,6 @@ async def group_scheduler_handler(bot: BotClient, message: GroupMessage):
             else:
                 await message.reply("删除定时任务失败")
         except Exception as e:
-            print(f"ERROR: {e}")
+            print(f"pinkcandy error: 定时任务操作异常。{e}")
             import traceback
             traceback.print_exc()

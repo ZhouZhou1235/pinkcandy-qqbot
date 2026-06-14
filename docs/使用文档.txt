@@ -1,0 +1,52 @@
+安装python环境
+安装QQ
+安装napcat
+
+项目根目录下：
+[windows]
+python -m venv venv
+venv\Scripts\activate
+pip install -r requirements.txt
+[linux]
+python3 -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+
+创建 config.json 放到根目录
+
+启动
+[windows]
+点击 launcher.bat
+venv\Scripts\activate
+python main.py
+[linux]
+napcat
+source venv/bin/activate
+python3 main.py
+
+
+相关链接
+
+napcat github
+https://github.com/NapNeko/NapCatQQ
+
+napcat文档
+https://www.napcat.wiki
+
+ncatbot文档
+https://docs.ncatbot.xyz
+
+napcat安装脚本
+curl -o \
+napcat.sh \
+https://nclatest.znin.net/NapNeko/NapCat-Installer/main/script/install.sh \
+&& sudo bash napcat.sh
+
+
+用到的systemctl命令
+
+# systemctl daemon-reload # 重载服务配置
+# systemctl start <service_name> # 启动
+# systemctl status <service_name> # 查看状态
+# systemctl stop <service_name> # 停止
+# journalctl -u <service_name> -f # 查看日志

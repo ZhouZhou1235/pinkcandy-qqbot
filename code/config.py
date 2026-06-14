@@ -2,91 +2,12 @@
 
 import json
 import os
-import asyncio
-import threading
-import time
-import schedule
-import datetime
-from typing import Callable
-from code.models import BotConfig
 from code.database import SQLiteConnecter
 from code.agent import MemoryChatRobot
+from code.models import BotConfig
+from code.utils import ScheduleTask
 
-class ScheduleTask:
-    def __init__(self, name="Unknown"):
-        self.name = name
-        self.tasks = []
-        self.running = True
-        self.loop = asyncio.new_event_loop()
-        self.loop_thread = threading.Thread(target=self._run_loop, daemon=True, name=f"SchedulerLoop-{name}")
-        self.loop_thread.start()
-        self.schedule_instance = schedule.Scheduler()
-        self.schedule_thread = threading.Thread(target=self._run_pending, daemon=True, name=f"SchedulerPending-{name}")
-        self.schedule_thread.start()
-        self.task_counter = 0
-
-    def _run_loop(self):
-        asyncio.set_event_loop(self.loop)
-        self.loop.run_forever()
-
-    def _run_pending(self):
-        while self.running:
-            self.schedule_instance.run_pending()
-            time.sleep(0.1)
-
-    def _run_async_task(self, task: Callable, *args, **kwargs):
-        if asyncio.iscoroutinefunction(task):
-            asyncio.run_coroutine_threadsafe(task(*args, **kwargs), self.loop)
-        else:
-            task(*args, **kwargs)
-
-    def schedule_task(self, delay: int, task: Callable, *args, **kwargs):
-        self.task_counter += 1
-        job_id = f"single_{self.task_counter}"
-        def execute_once():
-            self._run_async_task(task, *args, **kwargs)
-            self.tasks = [t for t in self.tasks if t["id"] != job_id]
-        timer = threading.Timer(delay, execute_once)
-        timer.daemon = True
-        timer.start()
-        class MockJob:
-            def __init__(self, job_id):
-                self.id = job_id
-                self.next_run = datetime.datetime.now() + datetime.timedelta(seconds=delay)
-        mock_job = MockJob(job_id)
-        self.tasks.append({"id": job_id, "job": mock_job, "timer": timer})
-        return job_id
-
-    def schedule_loop_task(self, interval: int, task: Callable, *args, **kwargs):
-        self.task_counter += 1
-        job_id = f"loop_{self.task_counter}"
-        job = self.schedule_instance.every(interval).seconds.do(self._run_async_task, task, *args, **kwargs)
-        self.tasks.append({"id": job_id, "job": job})
-        return job_id
-    
-    def schedule_loop_task_at(self, first_delay: int, interval: int, task: Callable, *args, **kwargs):
-        def run_and_reschedule():
-            self._run_async_task(task, *args, **kwargs)
-            if self.running:
-                next_timer = threading.Timer(interval, run_and_reschedule)
-                next_timer.daemon = True
-                next_timer.start()
-                self.tasks.append({"id": f"loop_reschedule_{id(next_timer)}", "job": None, "timer": next_timer})
-        
-        timer = threading.Timer(first_delay, run_and_reschedule)
-        timer.daemon = True
-        timer.start()
-        job_id = f"loop_at_{id(timer)}"
-        self.tasks.append({"id": job_id, "job": None, "timer": timer})
-        return job_id
-
-    def cancel_all_tasks(self):
-        for task in self.tasks:
-            if "timer" in task:
-                task["timer"].cancel()
-        self.schedule_instance.clear()
-        self.tasks.clear()
-
+# 配置管理器
 class ConfigManager:
     _instance = None
     def __new__(cls):
@@ -94,7 +15,6 @@ class ConfigManager:
             cls._instance = super().__new__(cls)
             cls._instance._initialized = False
         return cls._instance
-
     def __init__(self):
         if self._initialized:
             return
@@ -109,4 +29,3 @@ class ConfigManager:
         self.scheduler = ScheduleTask("bot-scheduler")
 
 config_manager = ConfigManager()
-

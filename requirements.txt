@@ -1,5 +1,8 @@
+Pillow>=10.0.0
+beautifulsoup4>=4.12.0
 langchain_core==0.3.72
 langchain_openai==0.3.28
+langchain_community>=0.3.0
 ncatbot==3.8.8.post7
 psutil==7.0.0
 pydantic==2.11.7

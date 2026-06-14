@@ -6,7 +6,6 @@ from ncatbot.core import GroupMessage
 from ncatbot.core import BotClient
 from code.utils import event_cooldown
 from code.config import config_manager
-from code.api import api_get_user
 
 # 群聊测试
 @event_cooldown(5)
@@ -41,9 +40,9 @@ async def group_test_handler(bot: BotClient, message: GroupMessage):
             await message.reply(text=f"ERROR: {e}")
     elif msg_content == "pk 管理员是谁":
         text = "=== 管理员列表 ===\n"
-        res = await api_get_user(bot, config_manager.bot_config.master_number)
+        res = bot.api.get_stranger_info(user_id=config_manager.bot_config.master_number)
         text += f"[总管理员] {res['data']['nick']}\n"
         for admin_user_id in config_manager.bot_config.admin_list:
-            res = await api_get_user(bot, admin_user_id)
+            res = await bot.api.get_stranger_info(user_id=admin_user_id)
             text += f"{res['data']['nick']}\n"
         await bot.api.post_group_msg(group_id=message.group_id, text=text)

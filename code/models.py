@@ -1,8 +1,9 @@
 # 数据模型
 
 from dataclasses import dataclass
-from typing import List
+from typing import List, Dict
 
+# 配置的数据模型
 @dataclass
 class BotConfig:
     bot_name: str
@@ -12,10 +13,9 @@ class BotConfig:
     admin_list: List[int]
     listen_qq_groups: List[int]
     full_show_groups: List[int]
-    SQLite_config: dict
-    MemoryChatRobot_config: dict
-    Ncatbot_config: dict
-
+    SQLite_config: Dict
+    MemoryChatRobot_config: Dict
+    Ncatbot_config: Dict
     @classmethod
     def load(cls, obj: dict):
         return cls(
@@ -30,4 +30,3 @@ class BotConfig:
             MemoryChatRobot_config=obj['MemoryChatRobot_config'],
             Ncatbot_config=obj['Ncatbot_config']
         )
-

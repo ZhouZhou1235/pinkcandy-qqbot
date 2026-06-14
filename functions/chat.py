@@ -10,13 +10,13 @@ from code.config import config_manager
 async def private_chat_handler(bot: BotClient, message: PrivateMessage):
     try:
         session_id = f"{message.sender.user_id}"
-        response = await config_manager.chat_robot.private_chat(session_id, input_statement(message))
+        response = await config_manager.chat_robot.private_chat(session_id, message)
         if response:
             bot.api.post_private_msg_sync(user_id=message.user_id, text=str(response))
         else:
-            print("AI response is None")
+            print("pinkcandy error: AI 响应为空。")
     except Exception as e:
-        print(f"ERROR: {e}")
+        print(f"pinkcandy error: 私聊处理异常。{e}")
         import traceback
         traceback.print_exc()
 
@@ -34,12 +34,12 @@ async def group_chat_handler(bot: BotClient, message: GroupMessage):
         return
     try:
         session_id = f"{message.group_id}"
-        response = await config_manager.chat_robot.group_chat(session_id, input_statement(message))
+        response = await config_manager.chat_robot.group_chat(session_id, message)
         if response:
             bot.api.post_group_msg_sync(group_id=message.group_id, text=str(response))
         else:
-            print("AI response is None")
+            print("pinkcandy error: AI 响应为空。")
     except Exception as e:
-        print(f"ERROR: {e}")
+        print(f"pinkcandy error: 群聊处理异常。{e}")
         import traceback
         traceback.print_exc()
