@@ -10,5 +10,6 @@ AI大模型接口为deepseek，互联网搜索接口为博查。若更换接口�
 **完整见 docs/**<br />
 
 参考项目：<br />
-[群友白白的机叶](https://github.com/ReshiramXe/Graia_QQBOT_modules)<br />
-[群友土豆的机仙](https://github.com/EvernightAurora/SylviBot)<br />
+[白白的机叶](https://github.com/ReshiramXe/Graia_QQBOT_modules)<br />
+[土豆的机仙](https://github.com/EvernightAurora/SylviBot)<br />
+[暗风的猫猫bot](https://github.com/Jayfeather233/shinxbot2)<br>
