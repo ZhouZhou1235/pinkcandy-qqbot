@@ -16,7 +16,7 @@
         "base_url": "https://api.deepseek.com",
         "api_key": "......",
         "search_config": {
-            "enabled": true,
+            "enabled": false,
             "url": "https://api.bocha.cn/v1/web-search",
             "api_key": "......",
             "timeout": 10,
