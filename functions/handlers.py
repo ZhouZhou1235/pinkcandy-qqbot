@@ -8,8 +8,9 @@ from .chat import group_chat_handler, private_chat_handler
 from .date_reminder import group_date_handler
 from .scheduler import group_scheduler_handler
 from .search_gallery import group_search_gallery_handler
+from .cross_group_msg import group_cross_msg_handler
 from .active_talk import group_active_talk_handler
-from .get_tarotcard import group_tarot_handler
+# from .get_tarotcard import group_tarot_handler
 
 # 群聊处理
 async def group_handler(bot: BotClient, message: GroupMessage):
@@ -19,7 +20,10 @@ async def group_handler(bot: BotClient, message: GroupMessage):
     await group_date_handler(bot, message)
     await group_scheduler_handler(bot, message)
     await group_active_talk_handler(bot, message)
-    await group_tarot_handler(bot, message)
+    # 未经白白同意 故不开放抽塔罗牌功能
+    # await group_tarot_handler(bot, message)
+    await group_cross_msg_handler(bot, message)
+
 
 # 私聊处理
 async def private_handler(bot: BotClient, message: PrivateMessage):

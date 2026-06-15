@@ -14,7 +14,9 @@ class WebSearch:
     def __init__(self, config: BotConfig, llm: ChatOpenAI):
         search_cfg = config.MemoryChatRobot_config.get('search_config', {})
         self.enabled: bool = search_cfg.get('enabled', False)
-        self.search_url: str = search_cfg.get('url', 'https://www.bing.com')
+        self.search_url: str = search_cfg.get('url', 'https://api.bocha.cn/v1/web-search')
+        self.api_key: str = search_cfg.get('api_key', '')
+        self.url_backup: str = search_cfg.get('url_backup', 'https://bing.com')
         self.timeout: int = int(search_cfg.get('timeout', 10))
         self.max_chars: int = int(search_cfg.get('max_chars', 2000))
         self.trigger_keywords: List[str] = search_cfg.get('trigger_keywords', [])
@@ -30,26 +32,53 @@ class WebSearch:
             if kw.lower() in text:
                 return True
         return False
-    # 大模型判断是否需要搜索
-    async def _ask_llm_should_search(self, user_input: str) -> bool:
-        prompt = ChatPromptTemplate.from_messages([
-            ("system", '你是一个搜索判断助手。根据用户的问题，判断是否需要联网搜索最新信息才能准确回答。只需要回复"是"或"否"，不要回复其他内容。'),
-            ("human", "{input}"),
-        ])
-        chain = prompt | self.llm
+    # 获取搜索结果列表 博查api
+    def _web_search_results(self, query: str) -> List[dict]:
+        headers = {
+            'Authorization': f'Bearer {self.api_key}',
+            'Content-Type': 'application/json',
+        }
+        payload = {
+            'query': query,
+            'summary': True,
+            'freshness': 'noLimit',
+            'count': 10,
+        }
         try:
-            response = await asyncio.wait_for(
-                asyncio.to_thread(chain.invoke, {"input": user_input}),
+            resp = requests.post(
+                self.search_url,
+                headers=headers,
+                json=payload,
                 timeout=self.timeout
             )
-            result = response.content.strip()
-            return "是" in result
+            resp.raise_for_status()
+            data = resp.json()
         except Exception as e:
-            print(f"pinkcandy error: LLM搜索判断失败。{e}")
-            return False
-    # 搜索引擎获取结果列表
-    def _web_search_results(self, query: str) -> List[dict]:
-        search_url = f"{self.search_url}/search?q={quote(query)}"
+            print(f"pinkcandy error: 博查API请求失败，回退使用url_backup网页解析。{e}")
+            return self._web_search_results_fallback(query)
+        web_pages = data.get('data', {}).get('webPages', {})
+        if isinstance(web_pages, dict):
+            items = web_pages.get('value', [])
+        elif isinstance(web_pages, list):
+            items = web_pages
+        else:
+            items = data.get('data', {}).get('results', [])
+            if not items:
+                items = data.get('results', [])
+        results = []
+        for item in items:
+            results.append({
+                'title': item.get('name', '') or item.get('title', ''),
+                'url': item.get('url', '') or item.get('displayUrl', ''),
+                'snippet': item.get('snippet', '') or item.get('summary', ''),
+            })
+        if not results:
+            print("pinkcandy error: 博查API返回空结果，回退使用url_backup网页解析。")
+            return self._web_search_results_fallback(query)
+        return results
+    # 网页解析获取搜索结果
+    def _web_search_results_fallback(self, query: str) -> List[dict]:
+        search_url = f"{self.url_backup}/search?q={quote(query)}"
         headers = {
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
             'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
@@ -60,7 +89,7 @@ class WebSearch:
             resp.raise_for_status()
             resp.encoding = 'utf-8'
         except Exception as e:
-            print(f"pinkcandy error: 搜索引擎请求失败。{e}")
+            print(f"pinkcandy error: 回退搜索引擎请求失败。{e}")
             return []
         soup = BeautifulSoup(resp.text, 'html.parser')
         results = []
@@ -125,8 +154,7 @@ class WebSearch:
     async def web_search(self, query: str) -> str:
         try:
             search_results = self._web_search_results(query)
-            if not search_results:
-                return ''
+            if not search_results: return ''
             contents = await self._fetch_page_contents(search_results)
             return self._format_search_results(search_results, contents)
         except Exception as e:
@@ -137,7 +165,5 @@ class WebSearch:
         result = ''
         if not self.enabled: return result
         if self.should_search(user_input):
-            result = await self.web_search(user_input)
-        if await self._ask_llm_should_search(user_input):
             result = await self.web_search(user_input)
         return result
