@@ -33,6 +33,7 @@ async def group_test_handler(bot: BotClient, message: GroupMessage):
             "pk 服务群聊 | 列出qqbot提供服务的群聊",
             "pk 传信 格式：pk 传信 <群聊序号> <内容> | 跨群发送信息，提供群聊序号，qqbot将发送信息到指定群聊。",
             "pk 匿名传信 格式：pk 匿名传信 <群聊序号> <内容> | 匿名地跨群发送，提供群聊序号，qqbot将仅发送信息内容到指定群聊。",
+            "pk 远行商人 | 洛克王国世界 看看远哥在卖什么货",
         ]
         nodes = []
         for cmd in commands:
@@ -53,17 +54,17 @@ async def group_test_handler(bot: BotClient, message: GroupMessage):
         )
     elif msg_content == "pk 测试":
         try:
-            reply_text = "=== 测试 ===\n"
-            reply_text += f"{platform.uname().node} {platform.uname().system} {platform.uname().release}\n"
-            reply_text += f"CPU: {psutil.cpu_percent(interval=1)}% 内存: {psutil.virtual_memory().percent}%"
+            reply_text = f"""===测试===\n环境名：{platform.uname().node}\n操作系统：{platform.uname().system}\n内存使用情况: {psutil.virtual_memory().percent}%"""
             bot.api.post_group_msg_sync(group_id=message.group_id, text=reply_text)
         except Exception as e:
             await message.reply(text=f"ERROR: {e}")
     elif msg_content == "pk 管理员是谁":
-        text = "=== 管理员列表 ===\n"
+        text = "===管理员列表===\n"
         res = bot.api.get_stranger_info(user_id=config_manager.bot_config.master_number)
         text += f"[总管理员] {res['data']['nick']}\n"
         for admin_user_id in config_manager.bot_config.admin_list:
+            if admin_user_id==config_manager.bot_config.master_number:
+                continue
             res = await bot.api.get_stranger_info(user_id=admin_user_id)
             text += f"{res['data']['nick']}\n"
         await bot.api.post_group_msg(group_id=message.group_id, text=text)
