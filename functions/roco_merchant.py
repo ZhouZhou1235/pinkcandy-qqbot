@@ -37,7 +37,7 @@ def format_refresh_time(next_refresh: str) -> str:
         hours = int(diff.total_seconds() // 3600)
         minutes = int((diff.total_seconds() % 3600) // 60)
         if hours > 0: return f"{hours}时{minutes}分"
-        else: return f"{minutes}分钟后"
+        else: return f"{minutes}分钟"
     except:
         return next_refresh
 
